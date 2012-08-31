@@ -1,4 +1,4 @@
-FOSS-Nova-Form-URL-Encoding-library
-===================================
+form-url-encoding
+===
 
-FOSS Nova Form URL Encoding library
+FOSS Nova Form URL Encoding streaming library
