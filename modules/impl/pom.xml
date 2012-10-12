@@ -28,21 +28,17 @@
     <groupId>org.fossnova</groupId>
     <artifactId>fossnova-fue-parent</artifactId>
     <version>1.0.0.Beta1-SNAPSHOT</version>
-    <relativePath>../../../pom.xml</relativePath>
+    <relativePath>../../pom.xml</relativePath>
   </parent>
 
-  <name>FOSS Nova Form URL Encoding Streaming Tests</name>
+  <name>FOSS Nova Form URL Encoding Streaming Implementation</name>
   <groupId>org.fossnova</groupId>
-  <artifactId>fossnova-fue-stream-tests</artifactId>
+  <artifactId>fossnova-fue-impl</artifactId>
 
   <dependencies>
     <dependency>
       <groupId>org.fossnova</groupId>
-      <artifactId>fossnova-fue-stream-impl</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
+      <artifactId>fossnova-fue-api</artifactId>
     </dependency>
   </dependencies>
 

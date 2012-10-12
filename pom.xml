@@ -40,9 +40,9 @@
   </properties>
 
   <modules>
-    <module>modules/streaming/api</module>
-    <module>modules/streaming/impl</module>
-    <module>modules/streaming/tests</module>
+    <module>modules/api</module>
+    <module>modules/impl</module>
+    <module>modules/tests</module>
   </modules>
 
   <dependencyManagement>
@@ -54,12 +54,12 @@
       </dependency>
       <dependency>
         <groupId>org.fossnova</groupId>
-        <artifactId>fossnova-fue-stream-api</artifactId>
+        <artifactId>fossnova-fue-api</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>
         <groupId>org.fossnova</groupId>
-        <artifactId>fossnova-fue-stream-impl</artifactId>
+        <artifactId>fossnova-fue-impl</artifactId>
         <version>${project.version}</version>
         <scope>test</scope>
       </dependency>
