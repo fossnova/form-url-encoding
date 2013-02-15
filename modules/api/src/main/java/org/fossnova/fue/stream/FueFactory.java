@@ -21,9 +21,7 @@ package org.fossnova.fue.stream;
 
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.Reader;
 import java.io.UnsupportedEncodingException;
-import java.io.Writer;
 
 import org.fossnova.finder.FactoryFinder;
 
@@ -47,11 +45,11 @@ public abstract class FueFactory {
      * @return factory instance
      */
     public static FueFactory newInstance() {
-        final FueFactory fueFactoryImpl = FactoryFinder.find( FueFactory.class );
-        if ( fueFactoryImpl != null ) {
-            return fueFactoryImpl;
+        final FueFactory fueFactory = FactoryFinder.find( FueFactory.class );
+        if ( fueFactory == null ) {
+            throw new IllegalStateException( "Factory not configured: " + FueFactory.class.getName() );
         }
-        throw new IllegalStateException( "Factory not configured: " + FueFactory.class.getName() );
+        return fueFactory;
     }
 
     /**

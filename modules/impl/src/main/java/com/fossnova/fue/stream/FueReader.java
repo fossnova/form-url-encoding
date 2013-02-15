@@ -26,14 +26,13 @@ import java.net.URLDecoder;
 
 import org.fossnova.fue.stream.FueEvent;
 import org.fossnova.fue.stream.FueException;
-import org.fossnova.fue.stream.FueReader;
 
 /**
  * @author <a href="mailto:opalka dot richard at gmail dot com">Richard Opalka</a>
  */
-final class FueReaderImpl implements FueReader {
+final class FueReader implements org.fossnova.fue.stream.FueReader {
 
-    private static final String reserverChars = "!#$'(),/:;?@[]";
+    private static final String reservedChars = "!#$'(),/:;?@[]";
     
     private final String encoding;
     
@@ -43,7 +42,7 @@ final class FueReaderImpl implements FueReader {
 
     private String s;
 
-    FueReaderImpl( final Reader in, final String encoding ) {
+    FueReader( final Reader in, final String encoding ) {
         this.in = new PushbackReader( in );
         this.encoding = encoding;
     }
@@ -161,8 +160,8 @@ final class FueReaderImpl implements FueReader {
     }
     
     private boolean isReservedCharacter( final int c ) {
-        for (int i = 0; i < reserverChars.length(); i++) {
-            if (reserverChars.codePointAt( i ) == c ) return true;
+        for (int i = 0; i < reservedChars.length(); i++) {
+            if (reservedChars.codePointAt( i ) == c ) return true;
         }
         return false;
     }

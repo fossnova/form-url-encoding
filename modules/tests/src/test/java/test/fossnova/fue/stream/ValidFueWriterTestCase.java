@@ -21,7 +21,6 @@ package test.fossnova.fue.stream;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 
 import org.fossnova.fue.stream.FueFactory;

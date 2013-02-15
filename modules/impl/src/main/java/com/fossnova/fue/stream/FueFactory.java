@@ -28,20 +28,16 @@ import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.nio.charset.Charset;
 
-import org.fossnova.fue.stream.FueFactory;
-import org.fossnova.fue.stream.FueReader;
-import org.fossnova.fue.stream.FueWriter;
-
 /**
  * @author <a href="mailto:opalka dot richard at gmail dot com">Richard Opalka</a>
  */
-public final class FueFactoryImpl extends FueFactory {
+public final class FueFactory extends org.fossnova.fue.stream.FueFactory {
 
     private static final String defaultCharset = Charset.defaultCharset().name();
 
     private FueReader newFueReader( final Reader reader, final String charsetName ) {
         assertNotNullParameter( reader );
-        return new FueReaderImpl( reader, charsetName );
+        return new FueReader( reader, charsetName );
     }
 
     @Override
@@ -58,7 +54,7 @@ public final class FueFactoryImpl extends FueFactory {
 
     private FueWriter newFueWriter( final Writer writer, final String charsetName ) {
         assertNotNullParameter( writer );
-        return new FueWriterImpl( writer, charsetName );
+        return new FueWriter( writer, charsetName );
     }
 
     @Override

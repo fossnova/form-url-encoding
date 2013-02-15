@@ -27,12 +27,10 @@ import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.net.URLEncoder;
 
-import org.fossnova.fue.stream.FueWriter;
-
 /**
  * @author <a href="mailto:opalka dot richard at gmail dot com">Richard Opalka</a>
  */
-final class FueWriterImpl implements FueWriter {
+final class FueWriter implements org.fossnova.fue.stream.FueWriter {
 
     private FueGrammarAnalyzer analyzer = new FueGrammarAnalyzer();
 
@@ -42,7 +40,7 @@ final class FueWriterImpl implements FueWriter {
 
     private boolean closed;
 
-    FueWriterImpl( final Writer out, final String encoding ) {
+    FueWriter( final Writer out, final String encoding ) {
         this.out = out;
         this.encoding = encoding;
     }
