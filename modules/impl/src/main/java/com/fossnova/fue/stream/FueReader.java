@@ -33,9 +33,9 @@ import org.fossnova.fue.stream.FueException;
 final class FueReader implements org.fossnova.fue.stream.FueReader {
 
     private static final String reservedChars = "!#$'(),/:;?@[]";
-    
+
     private final String encoding;
-    
+
     private FueGrammarAnalyzer analyzer = new FueGrammarAnalyzer();
 
     private PushbackReader in;
@@ -47,6 +47,7 @@ final class FueReader implements org.fossnova.fue.stream.FueReader {
         this.encoding = encoding;
     }
 
+    @Override
     public void close() {
         analyzer = null;
         in = null;
@@ -59,6 +60,7 @@ final class FueReader implements org.fossnova.fue.stream.FueReader {
         super.finalize();
     }
 
+    @Override
     public String getKey() {
         if ( !isCurrentEvent( FueEvent.KEY ) ) {
             throw new IllegalStateException( "Current event isn't KEY" );
@@ -66,6 +68,7 @@ final class FueReader implements org.fossnova.fue.stream.FueReader {
         return s;
     }
 
+    @Override
     public String getValue() {
         if ( !isCurrentEvent( FueEvent.VALUE ) ) {
             throw new IllegalStateException( "Current event isn't VALUE" );
@@ -73,6 +76,7 @@ final class FueReader implements org.fossnova.fue.stream.FueReader {
         return s;
     }
 
+    @Override
     public boolean hasNext() throws IOException {
         final int nextChar = in.read();
         if ( nextChar != -1 ) {
@@ -84,6 +88,7 @@ final class FueReader implements org.fossnova.fue.stream.FueReader {
         return false;
     }
 
+    @Override
     public FueEvent next() throws IOException {
         if ( !hasNext() ) {
             throw new FueException( "No more data available" );
@@ -99,7 +104,7 @@ final class FueReader implements org.fossnova.fue.stream.FueReader {
                 }
                     break;
                 case FueConstants.AMPERSAND: {
-                    if ( !analyzer.isEmpty()) {
+                    if ( !analyzer.isEmpty() ) {
                         exitLoop = true;
                     }
                     analyzer.push( FueGrammarToken.AMPERSAND );
@@ -109,7 +114,7 @@ final class FueReader implements org.fossnova.fue.stream.FueReader {
                     if ( analyzer.isEmpty() ) {
                         analyzer.push( FueGrammarToken.KEY );
                     } else {
-                        analyzer.push(  FueGrammarToken.VALUE );
+                        analyzer.push( FueGrammarToken.VALUE );
                     }
                     if ( nextCharacter != -1 ) {
                         in.unread( nextCharacter );
@@ -122,10 +127,12 @@ final class FueReader implements org.fossnova.fue.stream.FueReader {
         return analyzer.getCurrentEvent();
     }
 
+    @Override
     public boolean isKey() {
         return isCurrentEvent( FueEvent.KEY );
     }
 
+    @Override
     public boolean isValue() {
         return isCurrentEvent( FueEvent.VALUE );
     }
@@ -136,32 +143,32 @@ final class FueReader implements org.fossnova.fue.stream.FueReader {
         while ( true ) {
             currentChar = in.read();
             if ( isStringEnd( currentChar ) ) {
-                if (currentChar != -1) {
+                if ( currentChar != -1 ) {
                     in.unread( currentChar );
                 }
                 break;
             }
-            if ( isReservedCharacter( currentChar )) {
-                throw new FueException( "Reserver character cannot appear in Form URL Encoded string: " + (char)currentChar);
+            if ( isReservedCharacter( currentChar ) ) {
+                throw new FueException( "Reserver character cannot appear in Form URL Encoded string: " + ( char ) currentChar );
             }
             retVal.appendCodePoint( currentChar );
         }
-        if (retVal.length() != 0) {
+        if ( retVal.length() != 0 ) {
             s = URLDecoder.decode( retVal.toString(), encoding );
         }
     }
 
     private boolean isStringEnd( final int c ) {
-        return c == FueConstants.EQUALS || c == FueConstants.AMPERSAND || c == -1;
+        return ( c == FueConstants.EQUALS ) || ( c == FueConstants.AMPERSAND ) || ( c == -1 );
     }
 
     private boolean isCurrentEvent( final FueEvent event ) {
         return analyzer.getCurrentEvent() == event;
     }
-    
+
     private boolean isReservedCharacter( final int c ) {
-        for (int i = 0; i < reservedChars.length(); i++) {
-            if (reservedChars.codePointAt( i ) == c ) return true;
+        for ( int i = 0; i < reservedChars.length(); i++ ) {
+            if ( reservedChars.codePointAt( i ) == c ) return true;
         }
         return false;
     }

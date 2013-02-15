@@ -35,7 +35,7 @@ final class FueWriter implements org.fossnova.fue.stream.FueWriter {
     private FueGrammarAnalyzer analyzer = new FueGrammarAnalyzer();
 
     private final String encoding;
-    
+
     private Writer out;
 
     private boolean closed;
@@ -51,6 +51,7 @@ final class FueWriter implements org.fossnova.fue.stream.FueWriter {
         }
     }
 
+    @Override
     public void close() {
         analyzer = null;
         out = null;
@@ -63,14 +64,16 @@ final class FueWriter implements org.fossnova.fue.stream.FueWriter {
         super.finalize();
     }
 
+    @Override
     public FueWriter flush() throws IOException {
         ensureOpen();
         out.flush();
         return this;
     }
 
+    @Override
     public FueWriter writeKey( final String data ) throws IOException {
-        if ( data == null || data.length() == 0 ) {
+        if ( ( data == null ) || ( data.length() == 0 ) ) {
             throw new IllegalArgumentException( "Parameter cannot be null or empty string" );
         }
         ensureOpen();
@@ -80,6 +83,7 @@ final class FueWriter implements org.fossnova.fue.stream.FueWriter {
         return this;
     }
 
+    @Override
     public FueWriter writeValue( final String data ) throws IOException {
         ensureOpen();
         writeOptionalEquals();

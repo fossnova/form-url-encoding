@@ -62,5 +62,6 @@ public interface FueWriter extends Closeable {
      *
      * @throws IOException if I/O error occurs
      */
+    @Override
     void close();
 }

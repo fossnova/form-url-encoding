@@ -73,7 +73,7 @@ public final class ValidFueWriterTestCase {
         final String expected = "key+0=value+0&key+1=value+1&key+2=value+2";
         Assert.assertEquals( expected, getWriterOutput() );
     }
-    
+
     @Test
     public void emptyValues() throws IOException {
         writer.writeKey( "key 0" );
@@ -87,7 +87,7 @@ public final class ValidFueWriterTestCase {
         final String expected = "key+0=&key+1=&key+2=";
         Assert.assertEquals( expected, getWriterOutput() );
     }
-    
+
     @Test
     public void onlyKeys() throws IOException {
         writer.writeKey( "key 0" );

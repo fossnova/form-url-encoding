@@ -32,7 +32,7 @@ import org.junit.Test;
  * @author <a href="mailto:opalka dot richard at gmail dot com">Richard Opalka</a>
  */
 public final class InvalidFueWriterTestCase extends AbstractFueTestCase {
-    
+
     @Test
     public void valueFirst() throws IOException {
         final FueWriter writer = getFueWriter();

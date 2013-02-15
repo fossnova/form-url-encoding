@@ -88,5 +88,6 @@ public interface FueReader extends Closeable {
      *
      * @throws IOException if I/O error occurs
      */
+    @Override
     void close();
 }

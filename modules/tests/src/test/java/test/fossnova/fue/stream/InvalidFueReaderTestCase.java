@@ -28,6 +28,7 @@ import org.junit.Test;
  * @author <a href="mailto:opalka dot richard at gmail dot com">Richard Opalka</a>
  */
 public final class InvalidFueReaderTestCase extends AbstractFueTestCase {
+
     @Test
     public void read_equals() throws IOException {
         final FueReader reader = getFueReader( "=" );
@@ -54,13 +55,13 @@ public final class InvalidFueReaderTestCase extends AbstractFueTestCase {
         assertValueState( reader, null );
         assertFueException( reader, "Expecting Form URL Encoding KEY" );
     }
-    
+
     @Test
     public void read_key_containing_reserved_chars() throws IOException {
         final String reservedChars = "!#$'(),/:;?@[]";
         for ( int i = 0; i < reservedChars.length(); i++ ) {
-            final FueReader reader = getFueReader( String.valueOf( (char ) reservedChars.charAt( i ) ) );
-            assertFueException( reader, "Reserver character cannot appear in Form URL Encoded string: " + (char ) reservedChars.charAt( i ) );
+            final FueReader reader = getFueReader( String.valueOf( reservedChars.charAt( i ) ) );
+            assertFueException( reader, "Reserver character cannot appear in Form URL Encoded string: " + reservedChars.charAt( i ) );
         }
     }
 }

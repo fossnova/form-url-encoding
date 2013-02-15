@@ -27,7 +27,7 @@ final class FueConstants {
     static final char AMPERSAND = '&';
 
     static final char EQUALS = '=';
-    
+
     static final String KEY = "Form URL Encoding KEY";
 
     private FueConstants() {

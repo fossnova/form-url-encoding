@@ -20,8 +20,8 @@
 package com.fossnova.fue.stream;
 
 import static com.fossnova.fue.stream.FueGrammarToken.AMPERSAND;
-import static com.fossnova.fue.stream.FueGrammarToken.KEY;
 import static com.fossnova.fue.stream.FueGrammarToken.EQUALS;
+import static com.fossnova.fue.stream.FueGrammarToken.KEY;
 import static com.fossnova.fue.stream.FueGrammarToken.VALUE;
 
 import java.util.LinkedList;
@@ -39,6 +39,7 @@ final class FueGrammarAnalyzer {
     private FueEvent currentEvent; // TODO: remove this field - see 0 1 2 TODO replacing all these
 
     private boolean finished; // TODO: remove this field - see 0 1 2 TODO replacing all these
+
     // TODO: remove - replace with byte 0 1 2 representing states
     private final LinkedList< FueGrammarToken > stack = new LinkedList< FueGrammarToken >();
 
@@ -71,7 +72,7 @@ final class FueGrammarAnalyzer {
 
     private void putKey() {
         // preconditions
-        if ( !stack.isEmpty()) {
+        if ( !stack.isEmpty() ) {
             throw newFueException( getExpectingTokensMessage() );
         }
         // implementation
@@ -138,7 +139,7 @@ final class FueGrammarAnalyzer {
             throw newFueException( getExpectingTokensMessage() );
         }
     }
-    
+
     void setFinished() {
         finished = true;
         currentEvent = null;
