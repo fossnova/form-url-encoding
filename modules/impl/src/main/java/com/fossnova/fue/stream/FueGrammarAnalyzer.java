@@ -19,47 +19,24 @@
  */
 package com.fossnova.fue.stream;
 
-import static com.fossnova.fue.stream.FueGrammarToken.AMPERSAND;
-import static com.fossnova.fue.stream.FueGrammarToken.EQUALS;
-import static com.fossnova.fue.stream.FueGrammarToken.KEY;
-import static com.fossnova.fue.stream.FueGrammarToken.VALUE;
-
-import java.util.LinkedList;
-
 import org.fossnova.fue.stream.FueEvent;
 import org.fossnova.fue.stream.FueException;
 
 /**
- * @author <a href="mailto:opalka dot richard at gmail dot com">Richard Opalka</a>
+ * @author <a href="mailto:opalka.richard@gmail.com">Richard Opalka</a>
  */
 final class FueGrammarAnalyzer {
 
-    private boolean canWriteAmpersand; // TODO: remove this field - see 0 1 2 TODO replacing all these
+    private static final byte EMPTY = 0;
+    private static final byte KEY = 1;
+    private static final byte EQUALS = 2;
+    private byte stack;
+    private boolean canWriteAmpersand;
+    private boolean canWriteEquals;
+    FueEvent currentEvent;
+    boolean finished;
 
-    private FueEvent currentEvent; // TODO: remove this field - see 0 1 2 TODO replacing all these
-
-    private boolean finished; // TODO: remove this field - see 0 1 2 TODO replacing all these
-
-    // TODO: remove - replace with byte 0 1 2 representing states
-    private final LinkedList< FueGrammarToken > stack = new LinkedList< FueGrammarToken >();
-
-    void push( final FueGrammarToken event ) {
-        ensureCanContinue();
-        if ( event == KEY ) {
-            putKey();
-        } else if ( event == EQUALS ) {
-            putEquals();
-        } else if ( event == VALUE ) {
-            putValue();
-        } else if ( event == AMPERSAND ) {
-            putAmpersand();
-        } else {
-            throw new IllegalStateException();
-        }
-    }
-
-    FueEvent getCurrentEvent() {
-        return currentEvent;
+    FueGrammarAnalyzer() {
     }
 
     boolean isAmpersandExpected() {
@@ -67,98 +44,75 @@ final class FueGrammarAnalyzer {
     }
 
     boolean isEqualsExpected() {
-        return isLastOnStack( KEY );
+        return canWriteEquals;
     }
 
-    private void putKey() {
+    void putKey() throws FueException {
         // preconditions
-        if ( !stack.isEmpty() ) {
+        if ( stack != EMPTY ) {
             throw newFueException( getExpectingTokensMessage() );
         }
         // implementation
-        stack.add( KEY );
-        currentEvent = FueEvent.KEY;
         canWriteAmpersand = true;
+        canWriteEquals = true;
+        currentEvent = FueEvent.KEY;
+        stack = KEY;
     }
 
-    private void putValue() {
+    void putEquals() throws FueException {
         // preconditions
-        if ( !isLastOnStack( EQUALS ) ) {
+        if ( !canWriteEquals ) {
             throw newFueException( getExpectingTokensMessage() );
         }
         // implementation
-        stack.clear();
-        currentEvent = FueEvent.VALUE;
-        canWriteAmpersand = true; // TODO: needed?
-    }
-
-    private void putEquals() {
-        // preconditions
-        if ( !isLastOnStack( KEY ) ) {
-            throw newFueException( getExpectingTokensMessage() );
-        }
-        // implementation
-        stack.add( EQUALS );
+        canWriteAmpersand = true;
+        canWriteEquals = false;
         currentEvent = null;
+        stack = EQUALS;
     }
 
-    private void putAmpersand() {
+    void putValue() throws FueException {
+        // preconditions
+        if ( stack != EQUALS ) {
+            throw newFueException( getExpectingTokensMessage() );
+        }
+        // implementation
+        canWriteAmpersand = true;
+        canWriteEquals = false;
+        currentEvent = FueEvent.VALUE;
+        stack = EMPTY;
+    }
+
+    void putAmpersand() throws FueException {
         // preconditions
         if ( !canWriteAmpersand ) {
             throw newFueException( getExpectingTokensMessage() );
         }
         // implementation
-        currentEvent = !isEmpty() ? FueEvent.VALUE : null;
         canWriteAmpersand = false;
-        stack.clear();
+        canWriteEquals = false;
+        currentEvent = stack != EMPTY ? FueEvent.VALUE : null;
+        stack = EMPTY;
     }
 
     private String getExpectingTokensMessage() {
-        if ( isEmpty() ) {
-            if ( !canWriteAmpersand ) {
-                return "Expecting " + FueConstants.KEY;
-            } else {
-                return "Expecting " + FueConstants.AMPERSAND;
-            }
-        }
-        if ( isLastOnStack( KEY ) ) {
-            return "Expecting " + FueConstants.EQUALS;
-        }
-        if ( isLastOnStack( EQUALS ) ) {
-            return "Expecting " + FueConstants.AMPERSAND + " or EOF";
+        if ( stack == EMPTY ) {
+            return canWriteAmpersand ? "Expecting '&'" : "Expecting Form URL Encoding KEY";
+        } else if ( stack == KEY ) {
+            return "Expecting '=' or '&'";
+        } else if ( stack == EQUALS ) {
+            return "Expecting '&' or Form URL Encoding VALUE";
         }
         throw new IllegalStateException();
     }
 
-    private boolean isLastOnStack( final FueGrammarToken event ) {
-        return !isEmpty() && ( stack.getLast() == event );
-    }
-
-    void ensureCanContinue() {
-        if ( finished ) {
-            throw newFueException( getExpectingTokensMessage() );
-        }
-    }
-
-    void setFinished() {
-        finished = true;
-        currentEvent = null;
-    }
-
-    boolean isFinished() {
-        return finished;
-    }
-
     boolean isEmpty() {
-        return stack.size() == 0;
+        return stack == EMPTY;
     }
 
-    private FueException newFueException( final String s ) {
-        setCannotContinue();
+    FueException newFueException( final String s ) {
+        currentEvent = null;
         return new FueException( s );
     }
 
-    private void setCannotContinue() {
-        finished = true;
-    }
 }

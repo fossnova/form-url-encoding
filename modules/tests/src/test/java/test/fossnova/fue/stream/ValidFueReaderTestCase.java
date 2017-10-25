@@ -19,25 +19,23 @@
  */
 package test.fossnova.fue.stream;
 
-import java.io.IOException;
-
 import org.fossnova.fue.stream.FueReader;
 import org.junit.Test;
 
 /**
- * @author <a href="mailto:opalka dot richard at gmail dot com">Richard Opalka</a>
+ * @author <a href="mailto:opalka.richard@gmail.com">Richard Opalka</a>
  */
 public final class ValidFueReaderTestCase extends AbstractFueTestCase {
 
     @Test
-    public void noData() throws IOException {
+    public void noData() throws Exception {
         final FueReader reader = getFueReader( "" );
         assertFinalState( reader );
         reader.close();
     }
 
     @Test
-    public void simpleData() throws IOException {
+    public void simpleData() throws Exception {
         final FueReader reader = getFueReader( "a=b" );
         assertKeyState( reader, "a" );
         assertValueState( reader, "b" );
@@ -46,7 +44,7 @@ public final class ValidFueReaderTestCase extends AbstractFueTestCase {
     }
 
     @Test
-    public void moreComplexObject() throws IOException {
+    public void moreComplexObject() throws Exception {
         final FueReader reader = getFueReader( "key+0=value+0&key+1=value+1&key+2=&key+3=" );
         assertKeyState( reader, "key 0" );
         assertValueState( reader, "value 0" );
@@ -61,11 +59,12 @@ public final class ValidFueReaderTestCase extends AbstractFueTestCase {
     }
 
     @Test
-    public void controlsEncoding() throws IOException {
+    public void controlsEncoding() throws Exception {
         final FueReader reader = getFueReader( "+encoded+=%21%23%24%26%27%28%29*%2B%2C%2F%3A%3B%3D%3F%40%5B%5D" );
         assertKeyState( reader, " encoded " );
         assertValueState( reader, "!#$&'()*+,/:;=?@[]" );
         assertFinalState( reader );
         reader.close();
     }
+
 }

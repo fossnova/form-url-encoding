@@ -20,7 +20,6 @@
 package com.fossnova.fue.stream;
 
 import java.io.IOException;
-import java.io.PushbackReader;
 import java.io.Reader;
 import java.net.URLDecoder;
 
@@ -28,148 +27,175 @@ import org.fossnova.fue.stream.FueEvent;
 import org.fossnova.fue.stream.FueException;
 
 /**
- * @author <a href="mailto:opalka dot richard at gmail dot com">Richard Opalka</a>
+ * @author <a href="mailto:opalka.richard@gmail.com">Richard Opalka</a>
  */
 final class FueReader implements org.fossnova.fue.stream.FueReader {
 
-    private static final String reservedChars = "!#$'(),/:;?@[]";
+    private static final String RESERVED_CHARS = "!#$'(),/:;?@[]";
+    private static final char AMPERSAND = '&';
+    private static final char EQUALS = '=';
 
     private final String encoding;
-
-    private FueGrammarAnalyzer analyzer = new FueGrammarAnalyzer();
-
-    private PushbackReader in;
-
+    private final Reader in;
+    private final FueGrammarAnalyzer analyzer;
+    private char[] buffer = new char[ 1024 ];
+    private int position;
+    private int limit;
     private String s;
+    private boolean closed;
 
     FueReader( final Reader in, final String encoding ) {
-        this.in = new PushbackReader( in );
+        this.in = in;
+        analyzer = new FueGrammarAnalyzer();
         this.encoding = encoding;
     }
 
     @Override
-    public void close() {
-        analyzer = null;
-        in = null;
-        s = null;
-    }
-
-    @Override
-    protected void finalize() throws Throwable {
-        close();
-        super.finalize();
+    public void close() throws IOException, FueException {
+        if ( closed ) return; // idempotent
+        closed = true;
+        analyzer.currentEvent = null;
+        in.close();
     }
 
     @Override
     public String getKey() {
-        if ( !isCurrentEvent( FueEvent.KEY ) ) {
-            throw new IllegalStateException( "Current event isn't KEY" );
+        if ( analyzer.currentEvent != FueEvent.KEY ) {
+            throw new IllegalStateException();
         }
         return s;
     }
 
     @Override
     public String getValue() {
-        if ( !isCurrentEvent( FueEvent.VALUE ) ) {
-            throw new IllegalStateException( "Current event isn't VALUE" );
+        if ( analyzer.currentEvent != FueEvent.VALUE ) {
+            throw new IllegalStateException();
         }
         return s;
     }
 
     @Override
-    public boolean hasNext() throws IOException {
-        final int nextChar = in.read();
-        if ( nextChar != -1 ) {
-            in.unread( nextChar );
-            return true;
-        } else {
-            analyzer.setFinished();
-        }
-        return false;
-    }
-
-    @Override
-    public FueEvent next() throws IOException {
-        if ( !hasNext() ) {
-            throw new FueException( "No more data available" );
-        }
-        s = null;
-        analyzer.ensureCanContinue();
-        int nextCharacter = -1;
-        boolean exitLoop = false;
-        while ( !exitLoop ) {
-            switch ( nextCharacter = in.read() ) {
-                case FueConstants.EQUALS: {
-                    analyzer.push( FueGrammarToken.EQUALS );
-                }
-                    break;
-                case FueConstants.AMPERSAND: {
-                    if ( !analyzer.isEmpty() ) {
-                        exitLoop = true;
-                    }
-                    analyzer.push( FueGrammarToken.AMPERSAND );
-                }
-                    break;
-                default: {
-                    if ( analyzer.isEmpty() ) {
-                        analyzer.push( FueGrammarToken.KEY );
-                    } else {
-                        analyzer.push( FueGrammarToken.VALUE );
-                    }
-                    if ( nextCharacter != -1 ) {
-                        in.unread( nextCharacter );
-                        readString();
-                    }
-                    exitLoop = true;
-                }
-            }
-        }
-        return analyzer.getCurrentEvent();
-    }
-
-    @Override
     public boolean isKey() {
-        return isCurrentEvent( FueEvent.KEY );
+        return analyzer.currentEvent == FueEvent.KEY;
     }
 
     @Override
     public boolean isValue() {
-        return isCurrentEvent( FueEvent.VALUE );
+        return analyzer.currentEvent == FueEvent.VALUE;
     }
 
-    private void readString() throws IOException {
-        final StringBuilder retVal = new StringBuilder();
-        int currentChar = -1;
+    @Override
+    public boolean hasNext() throws IOException {
+        return hasMoreData();
+    }
+
+    @Override
+    public FueEvent next() throws IOException, FueException {
+        ensureOpen();
+        s = null;
+        int currentChar;
         while ( true ) {
-            currentChar = in.read();
-            if ( isStringEnd( currentChar ) ) {
-                if ( currentChar != -1 ) {
-                    in.unread( currentChar );
+            currentChar = position < limit ? buffer[ position++ ] : read();
+            if ( currentChar == EQUALS ) {
+                analyzer.putEquals();
+            } else if ( currentChar == AMPERSAND ) {
+                analyzer.putAmpersand();
+                if ( analyzer.currentEvent != null ) {
+                    return analyzer.currentEvent;
                 }
+            } else {
+                if ( currentChar != -1 ) {
+                    readString();
+                } else if ( analyzer.isEmpty() ) {
+                    throw new IllegalStateException("No more FORM URL Encoding tokens available");
+                }
+                if ( analyzer.isEmpty() ) {
+                    analyzer.putKey();
+                } else {
+                    analyzer.putValue();
+                }
+                return analyzer.currentEvent;
+            }
+        }
+    }
+
+    private void readString() throws IOException, FueException {
+        int stringOffset = position - 1;
+        int stringLength;
+        char currentChar = buffer[ stringOffset ];
+        assertNotReservedCharacter( currentChar );
+        do {
+            while ( position < limit ) {
+                currentChar = buffer[ position++ ];
+                assertNotReservedCharacter( currentChar );
+                if ( !isStringEnd( currentChar ) ) continue;
+                position--;
                 break;
             }
-            if ( isReservedCharacter( currentChar ) ) {
-                throw new FueException( "Reserver character cannot appear in Form URL Encoded string: " + ( char ) currentChar );
-            }
-            retVal.appendCodePoint( currentChar );
-        }
-        if ( retVal.length() != 0 ) {
-            s = URLDecoder.decode( retVal.toString(), encoding );
-        }
+            stringLength = position - stringOffset;
+            if ( position < limit ) break;
+            if ( stringOffset != 0 ) {
+                System.arraycopy( buffer, stringOffset, buffer, 0, stringLength );
+                position = stringLength;
+                limit = stringLength;
+                stringOffset = 0;
+            } else if ( limit == buffer.length ) doubleBuffer();
+        } while ( hasMoreData() );
+        s = URLDecoder.decode( new String( buffer, stringOffset, stringLength ), encoding );
     }
 
     private boolean isStringEnd( final int c ) {
-        return ( c == FueConstants.EQUALS ) || ( c == FueConstants.AMPERSAND ) || ( c == -1 );
+        return ( c == EQUALS ) || ( c == AMPERSAND ) || ( c == -1 );
     }
 
-    private boolean isCurrentEvent( final FueEvent event ) {
-        return analyzer.getCurrentEvent() == event;
-    }
-
-    private boolean isReservedCharacter( final int c ) {
-        for ( int i = 0; i < reservedChars.length(); i++ ) {
-            if ( reservedChars.codePointAt( i ) == c ) return true;
+    private boolean hasMoreData() throws IOException {
+        if ( position == limit ) {
+            if ( limit == buffer.length ) {
+                limit = 0;
+                position = 0;
+            }
+            fillBuffer();
         }
-        return false;
+        if ( position == limit ) {
+            analyzer.currentEvent = null;
+            analyzer.finished = true;
+        }
+        return position != limit;
     }
+
+    private void fillBuffer() throws IOException {
+        int read;
+        do {
+            read = in.read( buffer, limit, buffer.length - limit );
+            if ( read == -1 ) return;
+            limit += read;
+        } while ( limit != buffer.length );
+    }
+
+    private int read() throws IOException {
+        return hasMoreData() ? buffer[ position++ ] : -1;
+    }
+
+    private void ensureOpen() {
+        if ( closed ) {
+            throw new IllegalStateException( "Form URL Encoded reader have been closed" );
+        }
+    }
+
+    private void assertNotReservedCharacter( final char c ) throws FueException {
+        for ( int i = 0; i < RESERVED_CHARS.length(); i++ )
+            if ( RESERVED_CHARS.charAt( i ) == c )
+                throw newFueException( "Reserved character cannot appear in Form URL Encoded string: " + c );
+    }
+
+    private void doubleBuffer() {
+        final char[] oldData = buffer;
+        buffer = new char[ oldData.length * 2 ];
+        System.arraycopy( oldData, 0, buffer, 0, oldData.length );
+    }
+
+    private FueException newFueException( final String message ) {
+        return analyzer.newFueException( message );
+    }
+
 }

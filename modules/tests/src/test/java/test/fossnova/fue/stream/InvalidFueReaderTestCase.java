@@ -19,37 +19,35 @@
  */
 package test.fossnova.fue.stream;
 
-import java.io.IOException;
-
 import org.fossnova.fue.stream.FueReader;
 import org.junit.Test;
 
 /**
- * @author <a href="mailto:opalka dot richard at gmail dot com">Richard Opalka</a>
+ * @author <a href="mailto:opalka.richard@gmail.com">Richard Opalka</a>
  */
 public final class InvalidFueReaderTestCase extends AbstractFueTestCase {
 
     @Test
-    public void read_equals() throws IOException {
+    public void read_equals() throws Exception {
         final FueReader reader = getFueReader( "=" );
         assertFueException( reader, "Expecting Form URL Encoding KEY" );
     }
 
     @Test
-    public void read_ampersand() throws IOException {
+    public void read_ampersand() throws Exception {
         final FueReader reader = getFueReader( "&" );
         assertFueException( reader, "Expecting Form URL Encoding KEY" );
     }
 
     @Test
-    public void read_key_equals_equals() throws IOException {
+    public void read_key_equals_equals() throws Exception {
         final FueReader reader = getFueReader( "a==" );
         assertKeyState( reader, "a" );
-        assertFueException( reader, "Expecting & or EOF" );
+        assertFueException( reader, "Expecting '&' or Form URL Encoding VALUE" );
     }
 
     @Test
-    public void read_key_ampersand_ampersand() throws IOException {
+    public void read_key_ampersand_ampersand() throws Exception {
         final FueReader reader = getFueReader( "a&&" );
         assertKeyState( reader, "a" );
         assertValueState( reader, null );
@@ -57,11 +55,12 @@ public final class InvalidFueReaderTestCase extends AbstractFueTestCase {
     }
 
     @Test
-    public void read_key_containing_reserved_chars() throws IOException {
+    public void read_key_containing_reserved_chars() throws Exception {
         final String reservedChars = "!#$'(),/:;?@[]";
         for ( int i = 0; i < reservedChars.length(); i++ ) {
             final FueReader reader = getFueReader( String.valueOf( reservedChars.charAt( i ) ) );
-            assertFueException( reader, "Reserver character cannot appear in Form URL Encoded string: " + reservedChars.charAt( i ) );
+            assertFueException( reader, "Reserved character cannot appear in Form URL Encoded string: " + reservedChars.charAt( i ) );
         }
     }
+
 }

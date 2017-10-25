@@ -20,10 +20,8 @@
 package test.fossnova.fue.stream;
 
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 
-import org.fossnova.fue.stream.FueFactory;
+import org.fossnova.fue.stream.FueStreamFactory;
 import org.fossnova.fue.stream.FueWriter;
 import org.junit.After;
 import org.junit.Assert;
@@ -31,7 +29,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 /**
- * @author <a href="mailto:opalka dot richard at gmail dot com">Richard Opalka</a>
+ * @author <a href="mailto:opalka.richard@gmail.com">Richard Opalka</a>
  */
 public final class ValidFueWriterTestCase {
 
@@ -40,9 +38,9 @@ public final class ValidFueWriterTestCase {
     private FueWriter writer;
 
     @Before
-    public void init() throws UnsupportedEncodingException {
+    public void init() throws Exception {
         baos = new ByteArrayOutputStream();
-        writer = FueFactory.getInstance().newFueWriter( baos );
+        writer = FueStreamFactory.getInstance().newFueWriter( baos );
     }
 
     @After
@@ -52,7 +50,7 @@ public final class ValidFueWriterTestCase {
     }
 
     @Test
-    public void simpleData() throws IOException {
+    public void simpleData() throws Exception {
         writer.writeKey( "a" );
         writer.writeValue( "b" );
         writer.flush();
@@ -61,7 +59,7 @@ public final class ValidFueWriterTestCase {
     }
 
     @Test
-    public void moreComplexObject() throws IOException {
+    public void moreComplexObject() throws Exception {
         writer.writeKey( "key 0" );
         writer.writeValue( "value 0" );
         writer.writeKey( "key 1" );
@@ -75,7 +73,7 @@ public final class ValidFueWriterTestCase {
     }
 
     @Test
-    public void emptyValues() throws IOException {
+    public void emptyValues() throws Exception {
         writer.writeKey( "key 0" );
         writer.writeValue( null );
         writer.writeKey( "key 1" );
@@ -89,7 +87,7 @@ public final class ValidFueWriterTestCase {
     }
 
     @Test
-    public void onlyKeys() throws IOException {
+    public void onlyKeys() throws Exception {
         writer.writeKey( "key 0" );
         writer.writeKey( "key 1" );
         writer.writeKey( "key 2" );
@@ -100,7 +98,7 @@ public final class ValidFueWriterTestCase {
     }
 
     @Test
-    public void controlsEncoding() throws IOException {
+    public void controlsEncoding() throws Exception {
         writer.writeKey( " encoded " );
         writer.writeValue( "!#$&'()*+,/:;=?@[]" );
         writer.flush();
@@ -109,7 +107,7 @@ public final class ValidFueWriterTestCase {
         Assert.assertEquals( expected, getWriterOutput() );
     }
 
-    private String getWriterOutput() throws UnsupportedEncodingException {
+    private String getWriterOutput() throws Exception {
         return baos.toString( "UTF-8" );
     }
 }

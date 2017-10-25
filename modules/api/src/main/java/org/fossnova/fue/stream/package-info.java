@@ -21,7 +21,7 @@
  * Streaming API for writing and reading
  * <A href="http://www.w3.org/TR/html401/interact/forms.html#form-content-type">application/x-www-form-urlencoded</A> data.
  *
- * @author <a href="mailto:opalka dot richard at gmail dot com">Richard Opalka</a>
+ * @author <a href="mailto:opalka.richard@gmail.com">Richard Opalka</a>
  */
 package org.fossnova.fue.stream;
 

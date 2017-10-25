@@ -22,19 +22,17 @@ package test.fossnova.fue.stream;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
-import java.io.IOException;
-
 import org.fossnova.fue.stream.FueException;
 import org.fossnova.fue.stream.FueWriter;
 import org.junit.Test;
 
 /**
- * @author <a href="mailto:opalka dot richard at gmail dot com">Richard Opalka</a>
+ * @author <a href="mailto:opalka.richard@gmail.com">Richard Opalka</a>
  */
 public final class InvalidFueWriterTestCase extends AbstractFueTestCase {
 
     @Test
-    public void valueFirst() throws IOException {
+    public void valueFirst() throws Exception {
         final FueWriter writer = getFueWriter();
         try {
             writer.writeValue( "data" );
@@ -45,7 +43,7 @@ public final class InvalidFueWriterTestCase extends AbstractFueTestCase {
     }
 
     @Test
-    public void nullKey() throws IOException {
+    public void nullKey() throws Exception {
         final FueWriter writer = getFueWriter();
         try {
             writer.writeKey( null );
@@ -56,7 +54,7 @@ public final class InvalidFueWriterTestCase extends AbstractFueTestCase {
     }
 
     @Test
-    public void emptyKey() throws IOException {
+    public void emptyKey() throws Exception {
         final FueWriter writer = getFueWriter();
         try {
             writer.writeKey( "" );
@@ -67,7 +65,7 @@ public final class InvalidFueWriterTestCase extends AbstractFueTestCase {
     }
 
     @Test
-    public void keyValueValue() throws IOException {
+    public void keyValueValue() throws Exception {
         final FueWriter writer = getFueWriter();
         try {
             writer.writeKey( "key 1" );
@@ -75,7 +73,8 @@ public final class InvalidFueWriterTestCase extends AbstractFueTestCase {
             writer.writeValue( "value 2" );
             fail();
         } catch ( final FueException e ) {
-            assertEquals( "Expecting &", e.getMessage() );
+            assertEquals( "Expecting '&'", e.getMessage() );
         }
     }
+
 }

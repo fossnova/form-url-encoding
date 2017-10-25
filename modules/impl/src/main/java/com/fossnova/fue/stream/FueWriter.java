@@ -19,96 +19,114 @@
  */
 package com.fossnova.fue.stream;
 
-import static com.fossnova.fue.stream.FueConstants.AMPERSAND;
-import static com.fossnova.fue.stream.FueConstants.EQUALS;
+import static java.lang.Math.min;
+
+import org.fossnova.fue.stream.FueException;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.net.URLEncoder;
 
 /**
- * @author <a href="mailto:opalka dot richard at gmail dot com">Richard Opalka</a>
+ * @author <a href="mailto:opalka.richard@gmail.com">Richard Opalka</a>
  */
 final class FueWriter implements org.fossnova.fue.stream.FueWriter {
 
-    private FueGrammarAnalyzer analyzer = new FueGrammarAnalyzer();
+    private static final char AMPERSAND = '&';
+    private static final char EQUALS = '=';
 
+    private final FueGrammarAnalyzer analyzer;
+    private final Writer out;
+    private final char[] buffer = new char[ 1024 ];
     private final String encoding;
-
-    private Writer out;
-
+    private int limit;
     private boolean closed;
 
     FueWriter( final Writer out, final String encoding ) {
         this.out = out;
         this.encoding = encoding;
+        analyzer = new FueGrammarAnalyzer();
     }
 
-    private void ensureOpen() {
-        if ( closed ) {
-            throw new UnsupportedOperationException( "Form URL Encoding writer have been closed" );
+    @Override
+    public void close() throws IOException, FueException {
+        if ( closed ) return; // idempotent
+        closed = true;
+        try {
+            flush();
+            analyzer.finished = true;
+        } finally {
+            out.close();
         }
     }
 
     @Override
-    public void close() {
-        analyzer = null;
-        out = null;
-        closed = true;
+    public void flush() throws IOException {
+        if ( limit > 0 ) {
+            out.write( buffer, 0, limit );
+            limit = 0;
+            out.flush();
+        }
     }
 
     @Override
-    protected void finalize() throws Throwable {
-        close();
-        super.finalize();
-    }
-
-    @Override
-    public FueWriter flush() throws IOException {
-        ensureOpen();
-        out.flush();
-        return this;
-    }
-
-    @Override
-    public FueWriter writeKey( final String data ) throws IOException {
+    public FueWriter writeKey( final String data ) throws IOException, FueException {
         if ( ( data == null ) || ( data.length() == 0 ) ) {
             throw new IllegalArgumentException( "Parameter cannot be null or empty string" );
         }
-        ensureOpen();
         writeOptionalAmpersand();
-        analyzer.push( FueGrammarToken.KEY );
-        out.write( encode( data ) );
+        analyzer.putKey();
+        encode( data );
         return this;
     }
 
     @Override
-    public FueWriter writeValue( final String data ) throws IOException {
-        ensureOpen();
+    public FueWriter writeValue( final String data ) throws IOException, FueException {
         writeOptionalEquals();
-        analyzer.push( FueGrammarToken.VALUE );
+        analyzer.putValue();
         if ( data != null ) {
-            out.write( encode( data ) );
+            encode( data );
         }
         return this;
     }
 
-    private void writeOptionalAmpersand() throws IOException {
+    private void writeOptionalAmpersand() throws IOException, FueException {
         if ( analyzer.isAmpersandExpected() ) {
-            analyzer.push( FueGrammarToken.AMPERSAND );
-            out.write( AMPERSAND );
+            analyzer.putAmpersand();
+            write( AMPERSAND );
         }
     }
 
-    private void writeOptionalEquals() throws IOException {
+    private void writeOptionalEquals() throws IOException, FueException {
         if ( analyzer.isEqualsExpected() ) {
-            analyzer.push( FueGrammarToken.EQUALS );
-            out.write( EQUALS );
+            analyzer.putEquals();
+            write( EQUALS );
         }
     }
 
-    private String encode( final String s ) throws UnsupportedEncodingException {
-        return URLEncoder.encode( s, encoding );
+    private void write( final char c ) throws IOException {
+        if ( limit == buffer.length ) {
+            out.write( buffer, 0, limit );
+            limit = 0;
+        }
+        buffer[ limit++ ] = c;
     }
+
+    private void encode( final String s ) throws IOException {
+        final String encodedString = URLEncoder.encode( s, encoding );
+        int count;
+        int dataBegin = 0;
+        int dataEnd = encodedString.length();
+        while ( dataBegin < dataEnd ) {
+            count = min( dataEnd - dataBegin, buffer.length - limit );
+            encodedString.getChars( dataBegin, dataBegin + count, buffer, limit );
+            dataBegin += count;
+            limit += count;
+            if ( limit == buffer.length )  {
+                out.write( buffer, 0, buffer.length );
+                limit = 0;
+            }
+        }
+    }
+
 }

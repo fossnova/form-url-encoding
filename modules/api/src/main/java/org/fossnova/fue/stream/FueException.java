@@ -21,10 +21,10 @@ package org.fossnova.fue.stream;
 
 /**
  * <code>Form URL Encoding</code> exception.
- * 
- * @author <a href="mailto:opalka dot richard at gmail dot com">Richard Opalka</a>
+ *
+ * @author <a href="mailto:opalka.richard@gmail.com">Richard Opalka</a>
  */
-public final class FueException extends RuntimeException {
+public final class FueException extends Exception {
 
     /**
      * Serialization version UID.

@@ -19,49 +19,49 @@
  */
 package org.fossnova.fue.stream;
 
-import java.io.Closeable;
+import java.io.Flushable;
 import java.io.IOException;
 
 /**
- * <code>Form URL Encoding</code> writer.
- * 
- * @author <a href="mailto:opalka dot richard at gmail dot com">Richard Opalka</a>
- * @see FueFactory
+ * {@code application/x-www-form-urlencoded} stream writer.
+ *
+ * @author <a href="mailto:opalka.richard@gmail.com">Richard Opalka</a>
+ * @see FueStreamFactory
  * @see FueReader
  */
-public interface FueWriter extends Closeable {
+public interface FueWriter extends Flushable, AutoCloseable {
 
     /**
      * Writes URL encoded <code>key</code> string.
-     * 
      * @param data to URL encode
-     * @throws IOException if I/O error occurs
      * @return this writer instance
+     * @throws IOException if I/O error occurs
+     * @throws FueException if wrong Form URL Encoding is detected
      */
-    FueWriter writeKey( String data ) throws IOException;
+    FueWriter writeKey( String data ) throws IOException, FueException;
 
     /**
      * Writes URL encoded <code>value</code> string.
-     * 
      * @param data to URL encode
-     * @throws IOException if I/O error occurs
      * @return this writer instance
+     * @throws IOException if I/O error occurs
+     * @throws FueException if wrong Form URL Encoding is detected
      */
-    FueWriter writeValue( String data ) throws IOException;
+    FueWriter writeValue( String data ) throws IOException, FueException;
 
     /**
      * Writes all cached data.
-     * 
      * @throws IOException if I/O error occurs
-     * @return this writer instance
+     * @throws FueException if wrong Form URL Encoding is detected
      */
-    FueWriter flush() throws IOException;
+    void flush() throws IOException;
 
     /**
-     * Free resources associated with this writer. Never closes underlying input stream or writer.
-     *
+     * Free resources associated with this writer. Closes underlying input stream or writer.
      * @throws IOException if I/O error occurs
+     * @throws FueException if wrong Form URL Encoding is detected
      */
     @Override
-    void close();
+    void close() throws IOException, FueException;
+
 }

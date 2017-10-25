@@ -29,25 +29,24 @@ import static org.junit.Assert.fail;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 
 import org.fossnova.fue.stream.FueException;
-import org.fossnova.fue.stream.FueFactory;
+import org.fossnova.fue.stream.FueStreamFactory;
 import org.fossnova.fue.stream.FueReader;
 import org.fossnova.fue.stream.FueWriter;
 
 /**
- * @author <a href="mailto:opalka dot richard at gmail dot com">Richard Opalka</a>
+ * @author <a href="mailto:opalka.richard@gmail.com">Richard Opalka</a>
  */
 abstract class AbstractFueTestCase {
 
-    static void assertFinalState( final FueReader reader ) throws IOException {
+    static void assertFinalState( final FueReader reader ) throws Exception {
         assertFalse( reader.hasNext() );
         assertNotKeyException( reader );
         assertNotValueException( reader );
     }
 
-    static void assertKeyState( final FueReader reader, final String expected ) throws IOException {
+    static void assertKeyState( final FueReader reader, final String expected ) throws Exception {
         assertTrue( reader.hasNext() );
         assertEquals( KEY, reader.next() );
         assertTrue( reader.isKey() );
@@ -56,7 +55,7 @@ abstract class AbstractFueTestCase {
         assertNotValueException( reader );
     }
 
-    static void assertValueState( final FueReader reader, final String expected ) throws IOException {
+    static void assertValueState( final FueReader reader, final String expected ) throws Exception {
         assertTrue( reader.hasNext() );
         assertEquals( VALUE, reader.next() );
         assertFalse( reader.isKey() );
@@ -69,7 +68,7 @@ abstract class AbstractFueTestCase {
         assertNotKeyException( reader );
     }
 
-    static void assertFueException( final FueReader reader, final String expected ) throws IOException {
+    static void assertFueException( final FueReader reader, final String expected ) throws Exception {
         assertTrue( reader.hasNext() );
         try {
             reader.next();
@@ -79,31 +78,30 @@ abstract class AbstractFueTestCase {
         }
     }
 
-    static FueReader getFueReader( final String data ) throws IOException {
+    static FueReader getFueReader( final String data ) throws Exception {
         final ByteArrayInputStream bais = new ByteArrayInputStream( data.getBytes() );
-        return FueFactory.getInstance().newFueReader( bais );
+        return FueStreamFactory.getInstance().newFueReader( bais );
     }
 
-    static FueWriter getFueWriter() throws IOException {
+    static FueWriter getFueWriter() throws Exception {
         final ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        return FueFactory.getInstance().newFueWriter( baos );
+        return FueStreamFactory.getInstance().newFueWriter( baos );
     }
 
-    private static void assertNotKeyException( final FueReader reader ) throws IOException {
+    private static void assertNotKeyException( final FueReader reader ) throws Exception {
         try {
             reader.getKey();
             fail();
         } catch ( final IllegalStateException e ) {
-            assertEquals( "Current event isn't KEY", e.getMessage() );
         }
     }
 
-    private static void assertNotValueException( final FueReader reader ) throws IOException {
+    private static void assertNotValueException( final FueReader reader ) throws Exception {
         try {
             reader.getValue();
             fail();
         } catch ( final IllegalStateException e ) {
-            assertEquals( "Current event isn't VALUE", e.getMessage() );
         }
     }
+
 }

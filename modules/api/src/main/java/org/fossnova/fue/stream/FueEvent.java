@@ -21,8 +21,8 @@ package org.fossnova.fue.stream;
 
 /**
  * <code>Form URL Encoding</code> parsing events.
- * 
- * @author <a href="mailto:opalka dot richard at gmail dot com">Richard Opalka</a>
+ *
+ * @author <a href="mailto:opalka.richard@gmail.com">Richard Opalka</a>
  */
 public enum FueEvent {
     /**

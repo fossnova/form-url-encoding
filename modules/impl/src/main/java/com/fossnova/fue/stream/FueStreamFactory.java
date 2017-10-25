@@ -24,49 +24,53 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Reader;
-import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.nio.charset.Charset;
 
 /**
- * @author <a href="mailto:opalka dot richard at gmail dot com">Richard Opalka</a>
+ * @author <a href="mailto:opalka.richard@gmail.com">Richard Opalka</a>
  */
-public final class FueFactory extends org.fossnova.fue.stream.FueFactory {
+public final class FueStreamFactory extends org.fossnova.fue.stream.FueStreamFactory {
 
-    private static final String defaultCharset = Charset.defaultCharset().name();
+    private static final Charset DEFAULT_CHARSET = Charset.forName( "UTF-8" );
 
-    private FueReader newFueReader( final Reader reader, final String charsetName ) {
+    public FueStreamFactory() {
+    }
+
+    @Override
+    public FueReader newFueReader( final Reader reader, final Charset charset ) {
         assertNotNullParameter( reader );
-        return new FueReader( reader, charsetName );
+        return new FueReader( reader, charset.name() );
     }
 
     @Override
-    public FueReader newFueReader( final InputStream stream ) throws UnsupportedEncodingException {
-        return newFueReader( stream, defaultCharset );
+    public FueReader newFueReader( final InputStream stream ) {
+        return newFueReader( stream, DEFAULT_CHARSET );
     }
 
     @Override
-    public FueReader newFueReader( final InputStream stream, final String charsetName ) throws UnsupportedEncodingException {
+    public FueReader newFueReader( final InputStream stream, final Charset charset ) {
         assertNotNullParameter( stream );
-        assertNotNullParameter( charsetName );
-        return newFueReader( new InputStreamReader( stream, charsetName ), charsetName );
+        assertNotNullParameter( charset );
+        return newFueReader( new InputStreamReader( stream, charset ), charset );
     }
 
-    private FueWriter newFueWriter( final Writer writer, final String charsetName ) {
+    @Override
+    public FueWriter newFueWriter( final Writer writer, final Charset charset ) {
         assertNotNullParameter( writer );
-        return new FueWriter( writer, charsetName );
+        return new FueWriter( writer, charset.name() );
     }
 
     @Override
-    public FueWriter newFueWriter( final OutputStream stream ) throws UnsupportedEncodingException {
-        return newFueWriter( stream, defaultCharset );
+    public FueWriter newFueWriter( final OutputStream stream ) {
+        return newFueWriter( stream, DEFAULT_CHARSET );
     }
 
     @Override
-    public FueWriter newFueWriter( final OutputStream stream, final String charsetName ) throws UnsupportedEncodingException {
+    public FueWriter newFueWriter( final OutputStream stream, final Charset charset ) {
         assertNotNullParameter( stream );
-        assertNotNullParameter( charsetName );
-        return newFueWriter( new OutputStreamWriter( stream, charsetName ), charsetName );
+        assertNotNullParameter( charset );
+        return newFueWriter( new OutputStreamWriter( stream, charset ), charset );
     }
 
     private static void assertNotNullParameter( final Object o ) {
@@ -74,4 +78,5 @@ public final class FueFactory extends org.fossnova.fue.stream.FueFactory {
             throw new NullPointerException( "Parameter cannot be null" );
         }
     }
+
 }
