@@ -42,7 +42,7 @@ public final class ValidFueWriterTestCase {
     @Before
     public void init() throws UnsupportedEncodingException {
         baos = new ByteArrayOutputStream();
-        writer = FueFactory.newInstance().newFueWriter( baos );
+        writer = FueFactory.getInstance().newFueWriter( baos );
     }
 
     @After

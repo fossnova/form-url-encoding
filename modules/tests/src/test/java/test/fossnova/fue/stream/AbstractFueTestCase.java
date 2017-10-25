@@ -81,12 +81,12 @@ abstract class AbstractFueTestCase {
 
     static FueReader getFueReader( final String data ) throws IOException {
         final ByteArrayInputStream bais = new ByteArrayInputStream( data.getBytes() );
-        return FueFactory.newInstance().newFueReader( bais );
+        return FueFactory.getInstance().newFueReader( bais );
     }
 
     static FueWriter getFueWriter() throws IOException {
         final ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        return FueFactory.newInstance().newFueWriter( baos );
+        return FueFactory.getInstance().newFueWriter( baos );
     }
 
     private static void assertNotKeyException( final FueReader reader ) throws IOException {

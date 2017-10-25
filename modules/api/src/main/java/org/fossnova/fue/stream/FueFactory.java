@@ -33,6 +33,8 @@ import org.fossnova.finder.FactoryFinder;
  */
 public abstract class FueFactory {
 
+    private static final FueFactory factory = FactoryFinder.find( FueFactory.class );
+
     /**
      * All implementations must provide public default constructor overriding this one.
      */
@@ -44,12 +46,8 @@ public abstract class FueFactory {
      * 
      * @return factory instance
      */
-    public static FueFactory newInstance() {
-        final FueFactory fueFactory = FactoryFinder.find( FueFactory.class );
-        if ( fueFactory == null ) {
-            throw new IllegalStateException( "Factory not configured: " + FueFactory.class.getName() );
-        }
-        return fueFactory;
+    public static FueFactory getInstance() {
+        return factory;
     }
 
     /**
