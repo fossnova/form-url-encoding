@@ -48,7 +48,6 @@
     <url>https://github.com/fossnova/form-url-encoding/issues</url>
   </issueManagement>
 
-
   <properties>
     <fossnova.factory.finder.version>1.0.1-SNAPSHOT</fossnova.factory.finder.version>
     <junit.version>4.10</junit.version>
